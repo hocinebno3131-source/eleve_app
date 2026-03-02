@@ -9,55 +9,42 @@ body { font-family:'Cairo', sans-serif; background:#f4f6f9; padding:30px; }
 table { width:100%; border-collapse:collapse; background:white; }
 th, td { padding:10px; border:1px solid #ccc; text-align:center; }
 th { background:#1976d2; color:white; }
-button { padding:5px 10px; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<h2>قائمة الطلبة المسجلين</h2>
+<h2>قائمة الطلبة (من ملف Excel)</h2>
 
 <table>
 <thead>
-<tr>
-<th>اللقب</th>
-<th>الاسم</th>
-<th>القسم</th>
-<th>الفوج</th>
-<th>الهاتف</th>
-<th>ملاحظة</th>
-<th>حذف</th>
-</tr>
+<tr id="tableHead"></tr>
 </thead>
 <tbody id="studentTable"></tbody>
 </table>
 
 <script>
-let students = JSON.parse(localStorage.getItem("students")) || [];
-let table = document.getElementById("studentTable");
-
-function renderTable() {
-    table.innerHTML = "";
-    students.forEach((student, index) => {
-        table.innerHTML += `
-        <tr>
-            <td>${student.last_name}</td>
-            <td>${student.first_name}</td>
-            <td>${student.class}</td>
-            <td>${student.group}</td>
-            <td>${student.phone}</td>
-            <td>${student.note}</td>
-            <td><button onclick="deleteStudent(${index})">❌</button></td>
-        </tr>`;
+fetch("students.csv")
+.then(response => response.text())
+.then(data => {
+    const rows = data.split("\n").map(row => row.split(","));
+    
+    const headRow = rows[0];
+    const tableHead = document.getElementById("tableHead");
+    headRow.forEach(col => {
+        tableHead.innerHTML += `<th>${col}</th>`;
     });
-}
 
-function deleteStudent(index) {
-    students.splice(index, 1);
-    localStorage.setItem("students", JSON.stringify(students));
-    renderTable();
-}
+    const tableBody = document.getElementById("studentTable");
 
-renderTable();
+    for(let i = 1; i < rows.length; i++){
+        let row = "<tr>";
+        rows[i].forEach(col => {
+            row += `<td>${col}</td>`;
+        });
+        row += "</tr>";
+        tableBody.innerHTML += row;
+    }
+});
 </script>
 
 </body>
